@@ -1,18 +1,3 @@
-# *  This Program is free software; you can redistribute it and/or modify
-# *  it under the terms of the GNU General Public License as published by
-# *  the Free Software Foundation; either version 2, or (at your option)
-# *  any later version.
-# *
-# *  This Program is distributed in the hope that it will be useful,
-# *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-# *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# *  GNU General Public License for more details.
-# *
-# *  You should have received a copy of the GNU General Public License
-# *  along with XBMC; see the file COPYING. If not, write to
-# *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
-# *  http://www.gnu.org/copyleft/gpl.html
-
 import os, sys, socket, urllib2
 from xml.dom import minidom
 import xbmc, xbmcgui, xbmcaddon
@@ -169,7 +154,7 @@ def properties(data,loc):
     set_property('Current.FeelsLike'     , feelslike(int(condition[0].attributes['temp'].value), int(round(float(wind[0].attributes['speed'].value) + 0.5))))
     set_property('Current.DewPoint'      , dewpoint(int(condition[0].attributes['temp'].value), int(atmosphere[0].attributes['humidity'].value)))
     set_property('Current.UVIndex'       , '')
-    set_property('Current.OutlookIcon'   , '%s.png' % condition[0].attributes['code'].value) # xbmc translates it to Current.ConditionIcon
+    set_property('Current.OutlookIcon'   , '%s.png' % condition[0].attributes['code'].value) # Kodi translates it to Current.ConditionIcon
     set_property('Current.FanartCode'    , condition[0].attributes['code'].value)
     set_property('Today.Sunrise'         , astronomy[0].attributes['sunrise'].value)
     set_property('Today.Sunset'          , astronomy[0].attributes['sunset'].value)
