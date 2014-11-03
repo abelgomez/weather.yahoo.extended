@@ -1,4 +1,7 @@
 v3.0.1
+- deprecate xbmc.abortRequested
+
+v3.0.1
 - fix UnicodeDecodeError
 
 v3.0.0

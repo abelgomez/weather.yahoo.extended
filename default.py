@@ -92,7 +92,7 @@ def parse_data(reply):
 def forecast(loc,locid):
     log('weather location: %s' % locid)
     retry = 0
-    while (retry < 6) and (not xbmc.abortRequested):
+    while (retry < 6) and (not MONITOR.abortRequested()):
         query = get_weather(locid)
         if query != '':
             retry = 6
@@ -166,8 +166,13 @@ def properties(data,loc):
         set_property('Day%i.OutlookIcon' % count, '%s.png' % item.attributes['code'].value)
         set_property('Day%i.FanartCode'  % count, item.attributes['code'].value)
 
+class MyMonitor(xbmc.Monitor):
+    def __init__(self, *args, **kwargs):
+        xbmc.Monitor.__init__(self)
+
 log('version %s started: %s' % (__version__, sys.argv))
 
+MONITOR = MyMonitor()
 set_property('WeatherProvider', __addonname__)
 set_property('WeatherProviderLogo', xbmc.translatePath(os.path.join(__cwd__, 'resources', 'banner.png')))
 
