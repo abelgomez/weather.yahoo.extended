@@ -151,7 +151,10 @@ def properties(data,loc):
     set_property('Current.Humidity'      , atmosphere[0].attributes['humidity'].value)
     set_property('Current.Visibility'    , atmosphere[0].attributes['visibility'].value)
     set_property('Current.Pressure'      , atmosphere[0].attributes['pressure'].value)
-    set_property('Current.FeelsLike'     , feelslike(int(condition[0].attributes['temp'].value), int(round(float(wind[0].attributes['speed'].value)))))
+    if (wind[0].attributes['speed'].value != ''):
+        set_property('Current.FeelsLike'     , feelslike(int(condition[0].attributes['temp'].value), int(round(float(wind[0].attributes['speed'].value) + 0.5))))
+    else:
+        set_property('Current.FeelsLike' , '')
     set_property('Current.DewPoint'      , dewpoint(int(condition[0].attributes['temp'].value), int(atmosphere[0].attributes['humidity'].value)))
     set_property('Current.UVIndex'       , '')
     set_property('Current.OutlookIcon'   , '%s.png' % condition[0].attributes['code'].value) # Kodi translates it to Current.ConditionIcon
