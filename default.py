@@ -55,7 +55,7 @@ def location(loc):
     if data != '' and data.has_key('query') and data['query'].has_key('results') and data['query']['results'].has_key('place'):
         if isinstance (data['query']['results']['place'],list):
             for item in data['query']['results']['place']:
-                listitem   = item['name'] + ' (' + item['admin1']['content'] + ' - ' + item['country']['code'] + ')'
+                listitem = item['name'] + ' (' + (item['admin1']['content'] + ' - ' if item['admin1'] is not None else '') + item['country']['code'] + ')'
                 location   = item['name'] + ' (' + item['country']['code'] + ')'
                 locationid = item['woeid']
                 items.append(listitem)
