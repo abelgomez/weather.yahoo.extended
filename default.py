@@ -1,10 +1,7 @@
 import os, sys, socket, urllib2
 from xml.dom import minidom
 import xbmc, xbmcgui, xbmcaddon
-if sys.version_info < (2, 7):
-    import simplejson
-else:
-    import json as simplejson
+import json
 
 ADDON        = xbmcaddon.Addon()
 ADDONNAME    = ADDON.getAddonInfo('name')
@@ -83,7 +80,7 @@ def find_location(loc):
 
 def parse_data(reply):
     try:
-        data = simplejson.loads(reply)
+        data = json.loads(reply)
     except:
         log('failed to parse weather data')
         data = ''
