@@ -1,5 +1,6 @@
 v4.0.0
 - remove simplejson support
+- add option for 5 locations
 
 v3.0.8
 - cosmetics
