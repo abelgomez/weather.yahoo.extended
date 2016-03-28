@@ -1,3 +1,6 @@
+v4.0.1
+- change url due to api changes
+
 v4.0.0
 - remove simplejson support
 - add option for 5 locations
