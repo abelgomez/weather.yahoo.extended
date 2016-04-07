@@ -2,6 +2,7 @@ import os, sys, socket, urllib2
 from xml.dom import minidom
 import xbmc, xbmcgui, xbmcaddon
 import json
+import time
 
 ADDON        = xbmcaddon.Addon()
 ADDONNAME    = ADDON.getAddonInfo('name')
@@ -161,8 +162,16 @@ def properties(data,loc):
     set_property('Current.UVIndex'       , '')
     set_property('Current.OutlookIcon'   , '%s.png' % condition[0].attributes['code'].value) # Kodi translates it to Current.ConditionIcon
     set_property('Current.FanartCode'    , condition[0].attributes['code'].value)
-    set_property('Today.Sunrise'         , astronomy[0].attributes['sunrise'].value)
-    set_property('Today.Sunset'          , astronomy[0].attributes['sunset'].value)
+
+    time_format = xbmc.getRegion('time')
+    time_format = time_format.replace(":%S","")
+    sunrise_yahoo_time = time.strptime(astronomy[0].attributes['sunrise'].value, "%I:%M %p")
+    sunrise_local_time = time.strftime(time_format, sunrise_yahoo_time)
+    set_property('Today.Sunrise'         , sunrise_local_time)
+    sunset_yahoo_time = time.strptime(astronomy[0].attributes['sunset'].value, "%I:%M %p")
+    sunset_local_time = time.strftime(time_format, sunset_yahoo_time)
+    set_property('Today.Sunset'          , sunset_local_time)
+
     for count, item in enumerate(forecast):
         set_property('Day%i.Title'       % count, DAYS[item.attributes['day'].value])
         set_property('Day%i.HighTemp'    % count, item.attributes['high'].value)
