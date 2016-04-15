@@ -185,12 +185,12 @@ def props_wind(wind):
         set_property('Current.WindDirection' , winddir(int(wind['direction'])))
     else:
         set_property('Current.WindDirection' , '')
-    set_property('Current.WindChill'         , wind['chill'])
+    set_property('Current.WindChill'         , TEMP(int(wind['chill'])) + TEMPUNIT)
 
 def props_atmosphere(atmosphere):
     set_property('Current.Humidity'          , atmosphere['humidity'])
-    set_property('Current.Visibility'        , atmosphere['visibility'])
-    set_property('Current.Pressure'          , atmosphere['pressure'])
+    set_property('Current.Visibility'        , atmosphere['visibility'] + '%')
+    set_property('Current.Pressure'          , atmosphere['pressure'] + ' Pa')
 
 def props_feelslike(condition, wind):
     if (wind['speed']):
