@@ -49,7 +49,7 @@ def location(loc):
     query = find_location(loc)
     log('location data: %s' % query)
     data = parse_data(query)
-    if data and ('query' in data) and ('results' in data['query']) and ('place' in data['query']['results']):
+    if data and data.get('query',None) and data['query'].get('results',None) and data['query']['results'].get('place',None):
         results = data['query']['results']['place']
         if isinstance (results,list):
             for item in results:
@@ -149,7 +149,7 @@ def properties(response,loc):
     condition = ''
     wind = ''
     atmosphere = ''
-    if response and ('query' in response) and ('results' in response['query']) and ('channel' in response['query']['results']):
+    if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
         if 'wind' in data:
             wind = data['wind']
