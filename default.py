@@ -37,7 +37,7 @@ def refresh_locations():
         loc_name = ADDON.getSetting('Location%s' % count)
         if loc_name:
             locations += 1
-        set_property('Location%s' % count, loc_name)
+            set_property('Location%s' % count, loc_name)
     set_property('Locations', str(locations))
     log('available locations: %s' % str(locations))
 
