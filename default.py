@@ -171,6 +171,8 @@ def properties(response,loc):
             if 'forecast' in data['item']:
                 forecast = data['item']['forecast']
                 props_forecast(forecast)        
+    else:
+        clear()
 
 def props_condition(condition,loc):
     set_property('Current.Location'          , loc)
