@@ -1,6 +1,7 @@
 import os, sys, socket, urllib2, time
 from xml.dom import minidom
-import xbmc, xbmcgui, xbmcaddon
+import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+import cPickle as pickle
 import json
 import _strptime
 
@@ -10,6 +11,7 @@ ADDONID      = ADDON.getAddonInfo('id')
 ADDONVERSION = ADDON.getAddonInfo('version')
 CWD          = ADDON.getAddonInfo('path').decode("utf-8")
 RESOURCE     = xbmc.translatePath( os.path.join( CWD, 'resources', 'lib' ).encode("utf-8") ).decode("utf-8")
+DATAPATH     = os.path.join(xbmc.translatePath('special://profile/').decode('utf-8'), 'addon_data', ADDONID)
 
 sys.path.append(RESOURCE)
 
@@ -102,7 +104,7 @@ def forecast(loc,locid):
     if query:
         data = parse_data(query)
         if data:
-            properties(data,loc)
+            properties(data, loc, locid)
         else:
             clear()
     else:
@@ -145,12 +147,20 @@ def clear():
         set_property('Daily%i.OutlookIcon' % count, 'na.png')
         set_property('Daily%i.FanartCode'  % count, 'na')
 
-def properties(response,loc):
-    condition = ''
-    wind = ''
-    atmosphere = ''
+def properties(response, loc, locid):
+    data = ''
+    
     if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
+        pickle.dump(data, open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'wb'), protocol=0)
+    else:
+        data = pickle.load(open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'r'))
+
+    if data:
+        condition = ''
+        wind = ''
+        atmosphere = ''
+
         if 'wind' in data:
             wind = data['wind']
             props_wind(wind)
@@ -250,6 +260,10 @@ set_property('Alerts.IsFetched'   , '')
 set_property('Map.IsFetched'      , '')
 set_property('WeatherProvider'    , ADDONNAME)
 set_property('WeatherProviderLogo', xbmc.translatePath(os.path.join(CWD, 'resources', 'banner.png')))
+
+# Create data path if it doesn't exist
+if not xbmcvfs.exists(DATAPATH):
+    xbmcvfs.mkdir(DATAPATH)
 
 if sys.argv[1].startswith('Location'):
     keyboard = xbmc.Keyboard('', xbmc.getLocalizedString(14024), False)
