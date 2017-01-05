@@ -152,9 +152,12 @@ def properties(response, loc, locid):
     
     if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
+        data['age'] = time.time()
         pickle.dump(data, open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'wb'), protocol=0)
     else:
         data = pickle.load(open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'r'))
+        if data and (time.time() - data.get('age', 0) > 7200):
+            data = ''
 
     if data:
         condition = ''
