@@ -25,7 +25,7 @@ WEATHER_WINDOW   = xbmcgui.Window(12600)
 socket.setdefaulttimeout(10)
 
 def log(txt):
-    if isinstance (txt,str):
+    if isinstance (txt, str):
         txt = txt.decode("utf-8")
     message = u'%s: %s' % (ADDONID, txt)
     xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGDEBUG)
@@ -53,7 +53,7 @@ def location(loc):
     data = parse_data(query)
     if data and data.get('query',None) and data['query'].get('results',None) and data['query']['results'].get('place',None):
         results = data['query']['results']['place']
-        if isinstance (results,list):
+        if isinstance (results, list):
             for item in results:
                 listitem = item['name'] + ' (' + (item['admin1']['content'] + ' - ' if item['admin1'] is not None else '') + item['country']['code'] + ')'
                 location   = item['name'] + ' (' + item['country']['code'] + ')'
@@ -89,7 +89,7 @@ def parse_data(reply):
         log('failed to parse weather data')
     return response
 
-def forecast(loc,locid):
+def forecast(loc, locid):
     log('weather location: %s' % locid)
     retry = 0
     while (retry < 6) and (not MONITOR.abortRequested()):
@@ -173,7 +173,7 @@ def properties(response, loc, locid):
         if 'astronomy' in data:
             astronomy = data['astronomy']
             props_astronomy(astronomy)
-        if ('item' in data):
+        if 'item' in data:
             if 'condition' in data['item']:
                 condition = data['item']['condition']
                 props_condition(condition,loc)
@@ -187,7 +187,7 @@ def properties(response, loc, locid):
     else:
         clear()
 
-def props_condition(condition,loc):
+def props_condition(condition, loc):
     set_property('Current.Location'          , loc)
     set_property('Current.Condition'         , condition['text'].replace('/', ' / '))
     set_property('Current.Temperature'       , condition['temp'])
