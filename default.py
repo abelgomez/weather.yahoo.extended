@@ -1,6 +1,7 @@
 import os, sys, socket, urllib2, time
 from xml.dom import minidom
-import xbmc, xbmcgui, xbmcaddon
+import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+import cPickle as pickle
 import json
 import _strptime
 
@@ -10,6 +11,7 @@ ADDONID      = ADDON.getAddonInfo('id')
 ADDONVERSION = ADDON.getAddonInfo('version')
 CWD          = ADDON.getAddonInfo('path').decode("utf-8")
 RESOURCE     = xbmc.translatePath( os.path.join( CWD, 'resources', 'lib' ).encode("utf-8") ).decode("utf-8")
+DATAPATH     = xbmc.translatePath(ADDON.getAddonInfo('profile')).decode('utf-8')
 
 sys.path.append(RESOURCE)
 
@@ -23,7 +25,7 @@ WEATHER_WINDOW   = xbmcgui.Window(12600)
 socket.setdefaulttimeout(10)
 
 def log(txt):
-    if isinstance (txt,str):
+    if isinstance (txt, str):
         txt = txt.decode("utf-8")
     message = u'%s: %s' % (ADDONID, txt)
     xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGDEBUG)
@@ -51,7 +53,7 @@ def location(loc):
     data = parse_data(query)
     if data and data.get('query',None) and data['query'].get('results',None) and data['query']['results'].get('place',None):
         results = data['query']['results']['place']
-        if isinstance (results,list):
+        if isinstance (results, list):
             for item in results:
                 listitem = item['name'] + ' (' + (item['admin1']['content'] + ' - ' if item['admin1'] is not None else '') + item['country']['code'] + ')'
                 location   = item['name'] + ' (' + item['country']['code'] + ')'
@@ -87,7 +89,7 @@ def parse_data(reply):
         log('failed to parse weather data')
     return response
 
-def forecast(loc,locid):
+def forecast(loc, locid):
     log('weather location: %s' % locid)
     retry = 0
     while (retry < 6) and (not MONITOR.abortRequested()):
@@ -102,7 +104,7 @@ def forecast(loc,locid):
     if query:
         data = parse_data(query)
         if data:
-            properties(data,loc)
+            properties(data, loc, locid)
         else:
             clear()
     else:
@@ -145,12 +147,23 @@ def clear():
         set_property('Daily%i.OutlookIcon' % count, 'na.png')
         set_property('Daily%i.FanartCode'  % count, 'na')
 
-def properties(response,loc):
-    condition = ''
-    wind = ''
-    atmosphere = ''
+def properties(response, loc, locid):
+    data = ''
+    
     if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
+        data['age'] = time.time()
+        pickle.dump(data, open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'wb'), protocol=0)
+    else:
+        data = pickle.load(open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'r'))
+        if data and (time.time() - data.get('age', 0) > 7200):
+            data = ''
+
+    if data:
+        condition = ''
+        wind = ''
+        atmosphere = ''
+
         if 'wind' in data:
             wind = data['wind']
             props_wind(wind)
@@ -160,7 +173,7 @@ def properties(response,loc):
         if 'astronomy' in data:
             astronomy = data['astronomy']
             props_astronomy(astronomy)
-        if ('item' in data):
+        if 'item' in data:
             if 'condition' in data['item']:
                 condition = data['item']['condition']
                 props_condition(condition,loc)
@@ -171,8 +184,10 @@ def properties(response,loc):
             if 'forecast' in data['item']:
                 forecast = data['item']['forecast']
                 props_forecast(forecast)        
+    else:
+        clear()
 
-def props_condition(condition,loc):
+def props_condition(condition, loc):
     set_property('Current.Location'          , loc)
     set_property('Current.Condition'         , condition['text'].replace('/', ' / '))
     set_property('Current.Temperature'       , condition['temp'])
@@ -248,6 +263,10 @@ set_property('Alerts.IsFetched'   , '')
 set_property('Map.IsFetched'      , '')
 set_property('WeatherProvider'    , ADDONNAME)
 set_property('WeatherProviderLogo', xbmc.translatePath(os.path.join(CWD, 'resources', 'banner.png')))
+
+# Create data path if it doesn't exist
+if not xbmcvfs.exists(DATAPATH):
+    xbmcvfs.mkdir(DATAPATH)
 
 if sys.argv[1].startswith('Location'):
     keyboard = xbmc.Keyboard('', xbmc.getLocalizedString(14024), False)
