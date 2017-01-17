@@ -1,7 +1,6 @@
 import os, sys, socket, urllib2, time
 from xml.dom import minidom
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
-import cPickle as pickle
 import json
 import _strptime
 
@@ -149,21 +148,23 @@ def clear():
 
 def properties(response, loc, locid):
     data = ''
-    
     if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
         data['age'] = time.time()
-        pickle.dump(data, open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'wb'), protocol=0)
+        datafile = xbmcvfs.File(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'w')
+        datafile.write(str(data))
+        datafile.close()
     else:
-        data = pickle.load(open(os.path.join(DATAPATH, 'Location' + locid + '.dat'), 'r'))
-        if data and (time.time() - data.get('age', 0) > 7200):
-            data = ''
-
+        if xbmcvfs.exists(os.path.join(DATAPATH, 'Location' + locid + '.dat')):
+            datafile = xbmcvfs.File(os.path.join(DATAPATH, 'Location' + locid + '.dat'))
+            data = eval(datafile.read())
+            datafile.close()
+            if data and (time.time() - data.get('age', 0) > 7200):
+                data = ''
     if data:
         condition = ''
         wind = ''
         atmosphere = ''
-
         if 'wind' in data:
             wind = data['wind']
             props_wind(wind)
