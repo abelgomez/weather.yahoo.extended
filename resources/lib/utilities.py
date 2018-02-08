@@ -3,7 +3,7 @@
 import math
 import xbmc
 
-TEMPUNIT   = unicode(xbmc.getRegion('tempunit'),encoding='utf-8')
+TEMPUNIT   = xbmc.getRegion('tempunit')
 DATEFORMAT = xbmc.getRegion('dateshort')
 
 LDAYS = { 'Mon': xbmc.getLocalizedString( 11 ),

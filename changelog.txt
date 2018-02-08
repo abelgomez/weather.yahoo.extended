@@ -1,3 +1,6 @@
+v5.0.0
+- changes for python 3
+
 v4.3.1
 - retry to fetch weather a few times
 

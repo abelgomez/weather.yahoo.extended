@@ -1,6 +1,14 @@
-import os, sys, socket, urllib2, time
+import os
+import sys
+import socket
+import urllib.parse
+import urllib.request
+import time
 from xml.dom import minidom
-import xbmc, xbmcgui, xbmcaddon, xbmcvfs
+import xbmc
+import xbmcgui
+import xbmcaddon
+import xbmcvfs
 import json
 import _strptime
 
@@ -8,9 +16,9 @@ ADDON        = xbmcaddon.Addon()
 ADDONNAME    = ADDON.getAddonInfo('name')
 ADDONID      = ADDON.getAddonInfo('id')
 ADDONVERSION = ADDON.getAddonInfo('version')
-CWD          = ADDON.getAddonInfo('path').decode("utf-8")
-RESOURCE     = xbmc.translatePath( os.path.join( CWD, 'resources', 'lib' ).encode("utf-8") ).decode("utf-8")
-DATAPATH     = xbmc.translatePath(ADDON.getAddonInfo('profile')).decode('utf-8')
+CWD          = ADDON.getAddonInfo('path')
+RESOURCE     = xbmc.translatePath(os.path.join(CWD, 'resources', 'lib'))
+DATAPATH     = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 
 sys.path.append(RESOURCE)
 
@@ -24,10 +32,8 @@ WEATHER_WINDOW   = xbmcgui.Window(12600)
 socket.setdefaulttimeout(10)
 
 def log(txt):
-    if isinstance (txt, str):
-        txt = txt.decode("utf-8")
-    message = u'%s: %s' % (ADDONID, txt)
-    xbmc.log(msg=message.encode("utf-8"), level=xbmc.LOGDEBUG)
+    message = '%s: %s' % (ADDONID, txt)
+    xbmc.log(msg=message, level=xbmc.LOGDEBUG)
 
 def set_property(name, value):
     WEATHER_WINDOW.setProperty(name, value)
@@ -70,10 +76,10 @@ def location(loc):
     return items, locs, locids
 
 def find_location(loc):
-    query = urllib2.quote(LOC_QUERY % loc)
+    query = urllib.parse.quote(LOC_QUERY % loc)
     url = YQL_URL % query
     try:
-        req = urllib2.urlopen(url)
+        req = urllib.request.urlopen(url)
         response = req.read()
         req.close()
     except:
@@ -119,10 +125,10 @@ def forecast(loc, locid):
         clear()
 
 def get_weather(locid):
-    query = urllib2.quote(FORECAST_QUERY % locid)
+    query = urllib.parse.quote(FORECAST_QUERY % locid)
     url = YQL_URL % query
     try:
-        req = urllib2.urlopen(url)
+        req = urllib.request.urlopen(url)
         response = req.read()
         req.close()
     except:
@@ -130,30 +136,30 @@ def get_weather(locid):
     return response
     
 def clear():
-    set_property('Current.Condition'     , 'N/A')
-    set_property('Current.Temperature'   , '0')
-    set_property('Current.Wind'          , '0')
-    set_property('Current.WindDirection' , 'N/A')
-    set_property('Current.Humidity'      , '0')
-    set_property('Current.FeelsLike'     , '0')
-    set_property('Current.UVIndex'       , '0')
-    set_property('Current.DewPoint'      , '0')
-    set_property('Current.OutlookIcon'   , 'na.png')
-    set_property('Current.FanartCode'    , 'na')
+    set_property('Current.Condition', 'N/A')
+    set_property('Current.Temperature', '0')
+    set_property('Current.Wind', '0')
+    set_property('Current.WindDirection', 'N/A')
+    set_property('Current.Humidity', '0')
+    set_property('Current.FeelsLike', '0')
+    set_property('Current.UVIndex', '0')
+    set_property('Current.DewPoint', '0')
+    set_property('Current.OutlookIcon', 'na.png')
+    set_property('Current.FanartCode', 'na')
     for count in range (0, 7):
-        set_property('Day%i.Title'       % count, 'N/A')
-        set_property('Day%i.HighTemp'    % count, '0')
-        set_property('Day%i.LowTemp'     % count, '0')
-        set_property('Day%i.Outlook'     % count, 'N/A')
+        set_property('Day%i.Title' % count, 'N/A')
+        set_property('Day%i.HighTemp' % count, '0')
+        set_property('Day%i.LowTemp' % count, '0')
+        set_property('Day%i.Outlook' % count, 'N/A')
         set_property('Day%i.OutlookIcon' % count, 'na.png')
-        set_property('Day%i.FanartCode'  % count, 'na')
+        set_property('Day%i.FanartCode' % count, 'na')
     for count in range (1, 11):
-        set_property('Daily%i.Title'       % count, 'N/A')
-        set_property('Daily%i.HighTemp'    % count, '0')
-        set_property('Daily%i.LowTemp'     % count, '0')
-        set_property('Daily%i.Outlook'     % count, 'N/A')
+        set_property('Daily%i.Title' % count, 'N/A')
+        set_property('Daily%i.HighTemp' % count, '0')
+        set_property('Daily%i.LowTemp' % count, '0')
+        set_property('Daily%i.Outlook' % count, 'N/A')
         set_property('Daily%i.OutlookIcon' % count, 'na.png')
-        set_property('Daily%i.FanartCode'  % count, 'na')
+        set_property('Daily%i.FanartCode' % count, 'na')
 
 def properties(response, loc, locid):
     data = ''
@@ -198,61 +204,61 @@ def properties(response, loc, locid):
         clear()
 
 def props_condition(condition, loc):
-    set_property('Current.Location'          , loc)
-    set_property('Current.Condition'         , condition['text'].replace('/', ' / '))
-    set_property('Current.Temperature'       , condition['temp'])
-    set_property('Current.UVIndex'           , '')
-    set_property('Current.OutlookIcon'       , '%s.png' % condition['code']) # Kodi translates it to Current.ConditionIcon
-    set_property('Current.FanartCode'        , condition['code'])
+    set_property('Current.Location', loc)
+    set_property('Current.Condition', condition['text'].replace('/', ' / '))
+    set_property('Current.Temperature', condition['temp'])
+    set_property('Current.UVIndex', '')
+    set_property('Current.OutlookIcon', '%s.png' % condition['code']) # Kodi translates it to Current.ConditionIcon
+    set_property('Current.FanartCode', condition['code'])
 
 def props_wind(wind):
-    set_property('Current.Wind'              , wind['speed'])
+    set_property('Current.Wind', wind['speed'])
     if (wind['direction']):
-        set_property('Current.WindDirection' , winddir(int(wind['direction'])))
+        set_property('Current.WindDirection', winddir(int(wind['direction'])))
     else:
-        set_property('Current.WindDirection' , '')
-    set_property('Current.WindChill'         , TEMP(int(wind['chill'])) + TEMPUNIT)
+        set_property('Current.WindDirection', '')
+    set_property('Current.WindChill', TEMP(int(wind['chill'])) + TEMPUNIT)
 
 def props_atmosphere(atmosphere):
-    set_property('Current.Humidity'          , atmosphere['humidity'])
-    set_property('Current.Visibility'        , atmosphere['visibility'] + '%')
-    set_property('Current.Pressure'          , atmosphere['pressure'] + ' Pa')
+    set_property('Current.Humidity', atmosphere['humidity'])
+    set_property('Current.Visibility', atmosphere['visibility'] + '%')
+    set_property('Current.Pressure', atmosphere['pressure'] + ' Pa')
 
 def props_feelslike(condition, wind):
     if (wind['speed']):
-        set_property('Current.FeelsLike'     , feelslike(int(condition['temp']), int(round(float(wind['speed']) + 0.5))))
+        set_property('Current.FeelsLike', feelslike(int(condition['temp']), int(round(float(wind['speed']) + 0.5))))
     else:
-        set_property('Current.FeelsLike'     , '')
+        set_property('Current.FeelsLike', '')
 
 def props_dewpoint(condition, atmosphere):
     if (condition['temp']) and (atmosphere['humidity']):
-        set_property('Current.DewPoint'      , dewpoint(int(condition['temp']), int(atmosphere['humidity'])))
+        set_property('Current.DewPoint', dewpoint(int(condition['temp']), int(atmosphere['humidity'])))
     else:
-        set_property('Current.DewPoint'      , '')
+        set_property('Current.DewPoint', '')
 
 def props_astronomy(astronomy):
     ftime   = xbmc.getRegion('time').replace(":%S","").replace("%H%H","%H")
     sunrise = time.strptime(astronomy['sunrise'], "%I:%M %p")
     sunset  = time.strptime(astronomy['sunset'], "%I:%M %p")
-    set_property('Today.Sunrise'             , time.strftime(ftime, sunrise))
-    set_property('Today.Sunset'              , time.strftime(ftime, sunset))
+    set_property('Today.Sunrise', time.strftime(ftime, sunrise))
+    set_property('Today.Sunset', time.strftime(ftime, sunset))
 
 def props_forecast(forecast):
     for count, item in enumerate(forecast):
-        set_property('Day%i.Title'           % count, DAYS[item['day']])
-        set_property('Day%i.HighTemp'        % count, item['high'])
-        set_property('Day%i.LowTemp'         % count, item['low'])
-        set_property('Day%i.Outlook'         % count, item['text'].replace('/', ' / '))
-        set_property('Day%i.OutlookIcon'     % count, '%s.png' % item['code'])
-        set_property('Day%i.FanartCode'      % count, item['code'])
-        set_property('Daily.%i.ShortDay'        % (count + 1), DAYS[item['day']])
-        set_property('Daily.%i.LongDay'         % (count + 1), LDAYS[item['day']])
-        set_property('Daily.%i.ShortDate'       % (count + 1), DATE(item['date']))
+        set_property('Day%i.Title' % count, DAYS[item['day']])
+        set_property('Day%i.HighTemp' % count, item['high'])
+        set_property('Day%i.LowTemp' % count, item['low'])
+        set_property('Day%i.Outlook' % count, item['text'].replace('/', ' / '))
+        set_property('Day%i.OutlookIcon' % count, '%s.png' % item['code'])
+        set_property('Day%i.FanartCode' % count, item['code'])
+        set_property('Daily.%i.ShortDay' % (count + 1), DAYS[item['day']])
+        set_property('Daily.%i.LongDay' % (count + 1), LDAYS[item['day']])
+        set_property('Daily.%i.ShortDate' % (count + 1), DATE(item['date']))
         set_property('Daily.%i.HighTemperature' % (count + 1), TEMP(int(item['high'])) + TEMPUNIT)
-        set_property('Daily.%i.LowTemperature'  % (count + 1), TEMP(int(item['low'])) + TEMPUNIT)
-        set_property('Daily.%i.Outlook'         % (count + 1), item['text'].replace('/', ' / '))
-        set_property('Daily.%i.OutlookIcon'     % (count + 1), '%s.png' % item['code'])
-        set_property('Daily.%i.FanartCode'      % (count + 1), item['code'])
+        set_property('Daily.%i.LowTemperature' % (count + 1), TEMP(int(item['low'])) + TEMPUNIT)
+        set_property('Daily.%i.Outlook' % (count + 1), item['text'].replace('/', ' / '))
+        set_property('Daily.%i.OutlookIcon' % (count + 1), '%s.png' % item['code'])
+        set_property('Daily.%i.FanartCode' % (count + 1), item['code'])
 
 class MyMonitor(xbmc.Monitor):
     def __init__(self, *args, **kwargs):
@@ -262,16 +268,16 @@ class MyMonitor(xbmc.Monitor):
 log('version %s started: %s' % (ADDONVERSION, sys.argv))
 
 MONITOR = MyMonitor()
-set_property('Forecast.IsFetched' , '')
-set_property('Current.IsFetched'  , 'true')
-set_property('Today.IsFetched'    , 'true')
-set_property('Daily.IsFetched'    , 'true')
-set_property('Weekend.IsFetched'  , '')
-set_property('36Hour.IsFetched'   , '')
-set_property('Hourly.IsFetched'   , '')
-set_property('Alerts.IsFetched'   , '')
-set_property('Map.IsFetched'      , '')
-set_property('WeatherProvider'    , ADDONNAME)
+set_property('Forecast.IsFetched', '')
+set_property('Current.IsFetched', 'true')
+set_property('Today.IsFetched', 'true')
+set_property('Daily.IsFetched', 'true')
+set_property('Weekend.IsFetched', '')
+set_property('36Hour.IsFetched', '')
+set_property('Hourly.IsFetched', '')
+set_property('Alerts.IsFetched', '')
+set_property('Map.IsFetched', '')
+set_property('WeatherProvider', ADDONNAME)
 set_property('WeatherProviderLogo', xbmc.translatePath(os.path.join(CWD, 'resources', 'banner.png')))
 
 # Create data path if it doesn't exist
