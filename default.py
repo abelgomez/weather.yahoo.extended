@@ -31,7 +31,7 @@ def log(txt):
 
 def set_property(name, value):
     WEATHER_WINDOW.setProperty(name, value)
-
+	
 def refresh_locations():
     locations = 0
     for count in range(1, 6):
@@ -88,7 +88,7 @@ def parse_data(reply):
         log('failed to parse weather data')
     return response
 
-def forecast(loc, locid):
+def forecast(loc, locid, enable_sensors, prefer_sensors, sensors_url):
     log('weather location: %s' % locid)
     retry = 0
     while (retry < 10) and (not MONITOR.abortRequested()):
@@ -112,7 +112,13 @@ def forecast(loc, locid):
     if query:
         data = parse_data(query)
         if data:
-            properties(data, loc, locid)
+            log("enable_sensors: %s" % enable_sensors)
+            log("prefer_sensors: %s" % prefer_sensors)
+            if enable_sensors:
+                sensor_data = parse_data(get_sensor_data(sensors_url))
+            else:
+                sensor_data = {}
+            properties(data, loc, locid, prefer_sensors, sensor_data)
         else:
             clear()
     else:
@@ -124,6 +130,17 @@ def get_weather(locid):
     try:
         req = urllib2.urlopen(url)
         response = req.read()
+        req.close()
+    except:
+        return
+    return response
+
+def get_sensor_data(url):
+    try:
+        log('requesting sensor data at {}'.format(url))
+        req = urllib2.urlopen(url)
+        response = req.read()
+        log('response: {}'.format(response))
         req.close()
     except:
         return
@@ -155,7 +172,7 @@ def clear():
         set_property('Daily%i.OutlookIcon' % count, 'na.png')
         set_property('Daily%i.FanartCode'  % count, 'na')
 
-def properties(response, loc, locid):
+def properties(response, loc, locid, prefer_sensors, sensor_data):
     data = ''
     if response and response.get('query',None) and response['query'].get('results',None) and response['query']['results'].get('channel',None):
         data = response['query']['results']['channel']
@@ -179,27 +196,34 @@ def properties(response, loc, locid):
             props_wind(wind)
         if 'atmosphere' in data:
             atmosphere = data['atmosphere']
-            props_atmosphere(atmosphere)
+            props_atmosphere(atmosphere,prefer_sensors,sensor_data)
         if 'astronomy' in data:
             astronomy = data['astronomy']
             props_astronomy(astronomy)
         if 'item' in data:
             if 'condition' in data['item']:
                 condition = data['item']['condition']
-                props_condition(condition,loc)
+                props_condition(condition,loc,prefer_sensors,sensor_data)
                 if wind:
                     props_feelslike(condition, wind)
                 if atmosphere:
                     props_dewpoint(condition, atmosphere)
             if 'forecast' in data['item']:
                 forecast = data['item']['forecast']
-                props_forecast(forecast)        
+                props_forecast(forecast)
+        if prefer_sensors and 'temperature' in sensor_data and 'humidity' in sensor_data:
+            props_sensors(condition,atmosphere,sensor_data)
     else:
         clear()
 
-def props_condition(condition, loc):
+def props_sensors(condition, atmosphere, sensor_data):
+    set_property('Current.Temperature'       , "{:.1f}".format(sensor_data['temperature']))
+    set_property('Current.Humidity'          , "{:.0f}".format(sensor_data['humidity']))
+    set_property('Current.Condition'         , u"{}\N{DEGREE SIGN}C \N{MIDDLE DOT} {}% \N{MIDDLE DOT} {}".format(condition['temp'], atmosphere['humidity'], condition['text'].replace('/', ' / ')))
+		
+def props_condition(condition, loc, prefer_sensors, sensor_data):
     set_property('Current.Location'          , loc)
-    set_property('Current.Condition'         , condition['text'].replace('/', ' / '))
+    set_property('Current.Condition'         , condition['text'].replace('/', ' / ') if 'temperature' not in sensor_data and 'humidity' not in sensor_data else u"{:.1f}\N{DEGREE SIGN}C \N{MIDDLE DOT} {:.0f}% \N{MIDDLE DOT} {}".format(sensor_data['temperature'], sensor_data['humidity'], condition['text'].replace('/', ' / ')))
     set_property('Current.Temperature'       , condition['temp'])
     set_property('Current.UVIndex'           , '')
     set_property('Current.OutlookIcon'       , '%s.png' % condition['code']) # Kodi translates it to Current.ConditionIcon
@@ -213,7 +237,7 @@ def props_wind(wind):
         set_property('Current.WindDirection' , '')
     set_property('Current.WindChill'         , TEMP(int(wind['chill'])) + TEMPUNIT)
 
-def props_atmosphere(atmosphere):
+def props_atmosphere(atmosphere, prefer_sensors, sensor_data):
     set_property('Current.Humidity'          , atmosphere['humidity'])
     set_property('Current.Visibility'        , atmosphere['visibility'] + '%')
     set_property('Current.Pressure'          , atmosphere['pressure'] + ' Pa')
@@ -297,12 +321,18 @@ if sys.argv[1].startswith('Location'):
 else:
     location = ADDON.getSetting('Location%s' % sys.argv[1])
     locationid = ADDON.getSetting('Location%sid' % sys.argv[1])
+    enable_sensors = ADDON.getSetting('Location%senableSensors' % sys.argv[1]) == 'true'
+    prefer_sensors = ADDON.getSetting('Location%spreferSensors' % sys.argv[1]) == 'true'
+    sensors_url = ADDON.getSetting('Location%ssensorsURL' % sys.argv[1])
     if (not locationid) and (sys.argv[1] != '1'):
         location = ADDON.getSetting('Location1')
         locationid = ADDON.getSetting('Location1id')
+        enable_sensors = ADDON.getSetting('Location1enableSensors') == 'true'
+        prefer_sensors = ADDON.getSetting('Location1preferSensors') == 'true'
+        sensors_url = ADDON.getSetting('Location1sensorsURL')
         log('trying location 1 instead')
     if locationid:
-        forecast(location, locationid)
+        forecast(location, locationid, enable_sensors, prefer_sensors, sensors_url)
     else:
         log('empty location id')
         clear()

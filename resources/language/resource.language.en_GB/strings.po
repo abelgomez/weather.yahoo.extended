@@ -41,3 +41,15 @@ msgstr ""
 msgctxt "#32115"
 msgid "Location 5"
 msgstr ""
+
+msgctxt "#32120"
+msgid "Enable custom sensors"
+msgstr ""
+
+msgctxt "#32121"
+msgid "Prefer sensor data over provider data"
+msgstr ""
+
+msgctxt "#32122"
+msgid "Data provider URL"
+msgstr ""
