@@ -1,3 +1,6 @@
+v5.0.1
+- fix crash when speed is set to Beaufort
+
 v5.0.0
 - new version, old api closed
 
