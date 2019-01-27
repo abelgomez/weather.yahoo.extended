@@ -130,7 +130,7 @@
 		<language></language>
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE Version 2</license>
-		<forum>http://forum.kodi.tv/showthread.php?tid=169410</forum>
+		<forum>https://forum.kodi.tv/showthread.php?tid=169410</forum>
 		<source>https://gitlab.com/ronie/weather.yahoo</source>
 		<assets>
 			<icon>resources/icon.png</icon>
