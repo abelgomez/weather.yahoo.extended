@@ -1,3 +1,12 @@
+v5.0.5
+- fix url. thx olympus
+
+v5.0.4
+- fix hourly wind direction
+
+v5.0.3
+- cosmetics
+
 v5.0.2
 - fix crash when speed is set to Beaufort
 
